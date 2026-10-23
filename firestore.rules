@@ -1,0 +1,153 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net: Default-deny all undefined paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Common Hardened Security Primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidRole(role) {
+      return role in [
+        'Administrator',
+        'Warehouse Operator',
+        'Ration Shop Dealer'
+      ];
+    }
+
+    function getUserRole() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
+        : 'Warehouse Operator';
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        (request.auth.token.role == 'Administrator') ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Administrator')
+      );
+    }
+
+    function isWarehouseOrAdmin() {
+      return isSignedIn() && (
+        isAdmin() ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Warehouse Operator')
+      );
+    }
+
+    function isValidUser(data) {
+      return data.id is string &&
+             data.id == request.auth.uid &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.email is string && data.email.size() > 0 && data.email.size() <= 150 &&
+             isValidRole(data.role);
+    }
+
+    // 1. Users collection: Strictly private user account profiles
+    match /users/{userId} {
+      // Users can read their own profile; Administrators can read profiles for governance
+      allow get: if (isOwner(userId) || isAdmin()) && isValidId(userId);
+      // Only Administrators can list user records (prevents email harvesting)
+      allow list: if isAdmin();
+      // Public self-registration CANNOT self-grant Administrator (only Warehouse Operator or Ration Shop Dealer)
+      // Administrators can provision any official role
+      allow create: if isValidId(userId) && isValidUser(request.resource.data) && (
+        (isOwner(userId) && request.resource.data.role in ['Warehouse Operator', 'Ration Shop Dealer']) ||
+        isAdmin()
+      );
+      // Users cannot escalate their own role; Administrators can adjust roles
+      allow update: if isValidId(userId) && isValidUser(request.resource.data) && (
+        (isOwner(userId) && request.resource.data.role == resource.data.role) ||
+        isAdmin()
+      );
+      allow delete: if false;
+    }
+
+    // 2. Commodities Master: Authoritative staple classifications
+    match /commodities/{commodityId} {
+      allow read: if isSignedIn() && isValidId(commodityId);
+      allow create, update: if isAdmin() && isValidId(commodityId);
+      allow delete: if false;
+    }
+
+    // 3. Batches: Grain lots with receipt date and available bag counts
+    match /batches/{batchId} {
+      allow read: if isSignedIn() && isValidId(batchId);
+      allow create, update: if isWarehouseOrAdmin() && isValidId(batchId);
+      allow delete: if false; // Never delete inventory batches; update status to 'Exhausted'
+    }
+
+    // 4. Dispatches: Form PDS-12 digital challans and transit gate passes
+    match /dispatches/{challanNumber} {
+      allow read: if isSignedIn() && isValidId(challanNumber);
+      allow create: if isWarehouseOrAdmin() && isValidId(challanNumber);
+      allow update: if isSignedIn() && isValidId(challanNumber);
+      allow delete: if false; // Challans cannot be deleted once issued
+    }
+
+    // 5. Fair Price Shops (Ration Shops)
+    match /fair_price_shops/{shopId} {
+      allow read: if isSignedIn() && isValidId(shopId);
+      allow create, update: if isWarehouseOrAdmin() && isValidId(shopId);
+      allow delete: if false;
+    }
+
+    // 6. Stock Transactions: Granular movement audit ledger
+    match /stock_transactions/{transactionId} {
+      allow read: if isSignedIn() && isValidId(transactionId);
+      allow create: if isWarehouseOrAdmin() && isValidId(transactionId);
+      allow update, delete: if false; // Ledger entries cannot be tampered with
+    }
+
+    // 7. Audit Logs: Append-only compliance and vigilance ledger
+    match /audit_logs/{logId} {
+      allow read: if isSignedIn() && isValidId(logId);
+      allow create: if isSignedIn() && isValidId(logId);
+      allow update, delete: if false; // Append-only immutable log
+    }
+
+    // 8. Reconciliations: Physical stock counts and variance reports
+    match /reconciliations/{recId} {
+      allow read: if isSignedIn() && isValidId(recId);
+      allow create, update: if isWarehouseOrAdmin() && isValidId(recId);
+      allow delete: if false;
+    }
+
+    // 9. FIFO Exceptions: Overrides requiring manager digital sign-off
+    match /fifo_exceptions/{excId} {
+      allow read: if isSignedIn() && isValidId(excId);
+      allow create: if isWarehouseOrAdmin() && isValidId(excId);
+      allow update: if isAdmin() && isValidId(excId); // Only Administrators can approve exceptions
+      allow delete: if false;
+    }
+
+    // 10. Depot Settings: Global operational thresholds and rules
+    match /depot_settings/{settingsId} {
+      allow read: if isSignedIn() && isValidId(settingsId);
+      allow create, update: if isAdmin() && isValidId(settingsId);
+      allow delete: if false;
+    }
+
+    // 11. Diagnostic Connectivity Test collection
+    match /test/{testId} {
+      allow get: if isValidId(testId);
+      allow list: if false;
+      allow write: if isSignedIn() && isValidId(testId);
+    }
+  }
+}

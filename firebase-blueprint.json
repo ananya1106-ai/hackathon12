@@ -1,0 +1,454 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Authenticated SmartPDS civil supplies personnel account with assigned role clearance.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique user ID matching request.auth.uid"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Official name of the civil supplies officer"
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Official government email address"
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "Administrator",
+            "Warehouse Operator",
+            "Ration Shop Dealer"
+          ],
+          "description": "Assigned operational role clearance"
+        },
+        "designation": {
+          "type": "string",
+          "maxLength": 120,
+          "description": "Official government designation"
+        },
+        "department": {
+          "type": "string",
+          "maxLength": 120,
+          "description": "Civil Supplies department / wing"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Creation timestamp ISO string"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last update timestamp ISO string"
+        }
+      },
+      "required": ["id", "name", "email", "role"]
+    },
+    "Commodity": {
+      "title": "Commodity Master",
+      "description": "Registered PDS staple commodities with buffer norms and moisture thresholds.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Commodity key matching name (e.g. Rice, Wheat)"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Commodity display name"
+        },
+        "category": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Foodgrain category"
+        },
+        "standardBagWeightKg": {
+          "type": "number",
+          "description": "Standard sack net weight in kilograms"
+        },
+        "maxPermissibleMoisture": {
+          "type": "number",
+          "description": "Maximum permissible moisture percentage"
+        },
+        "bufferNormQtl": {
+          "type": "number",
+          "description": "Mandatory buffer stock norm in quintals"
+        },
+        "mspPerQtl": {
+          "type": "number",
+          "description": "Minimum Support Price valuation per quintal"
+        },
+        "subsidizedRatePerKg": {
+          "type": "number",
+          "description": "PDS issue rate per kg for beneficiaries"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Specification description"
+        }
+      },
+      "required": ["id", "name", "category", "standardBagWeightKg", "mspPerQtl"]
+    },
+    "Batch": {
+      "title": "Stock Batch",
+      "description": "Granular received stock lot with receipt timestamp for deterministic FIFO dispatch ordering.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique batch barcode identifier (e.g. BATCH-2026-RC-001)"
+        },
+        "commodity": {
+          "type": "string",
+          "enum": ["Rice", "Wheat", "Sugar", "Coarse Grains", "Pulses"],
+          "description": "Commodity type"
+        },
+        "variety": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Variety or specification"
+        },
+        "receivedDate": {
+          "type": "string",
+          "description": "Inward gate intake date (YYYY-MM-DD)"
+        },
+        "initialBags": {
+          "type": "number",
+          "description": "Initial received sack count"
+        },
+        "availableBags": {
+          "type": "number",
+          "description": "Current remaining available bags"
+        },
+        "bagWeightKg": {
+          "type": "number",
+          "description": "Net weight per bag in kg"
+        },
+        "totalReceivedQtl": {
+          "type": "number",
+          "description": "Initial received weight in quintals"
+        },
+        "availableQtl": {
+          "type": "number",
+          "description": "Current available weight in quintals"
+        },
+        "depotLocation": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Godown and bay location"
+        },
+        "warehouseName": {
+          "type": "string",
+          "maxLength": 120,
+          "description": "Depot warehouse name"
+        },
+        "moisturePercentage": {
+          "type": "number",
+          "description": "QC moisture percentage at gate inspection"
+        },
+        "qualityInspectionGrade": {
+          "type": "string",
+          "enum": ["Grade-I (FAQ)", "Grade-II", "Sub-Standard"],
+          "description": "Quality grading classification"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Eligible", "Quarantined", "Damaged", "Exhausted"],
+          "description": "FIFO eligibility status"
+        },
+        "statusReason": {
+          "type": "string",
+          "maxLength": 250,
+          "description": "Reason for status modification"
+        },
+        "supplierSource": {
+          "type": "string",
+          "maxLength": 120,
+          "description": "Supplying FCI depot or miller source"
+        },
+        "stockAgeDays": {
+          "type": "number",
+          "description": "Calculated elapsed days since intake"
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Operational remarks"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Record creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": ["id", "commodity", "variety", "receivedDate", "initialBags", "availableBags", "status"]
+    },
+    "DispatchRecord": {
+      "title": "Digital Dispatch Challan",
+      "description": "Official Form PDS-12 electronic issue order and gate pass generated from FIFO allocations.",
+      "type": "object",
+      "properties": {
+        "challanNumber": {
+          "type": "string",
+          "description": "Unique statutory challan identifier (e.g. PDS-CH-2026-1048)"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Dispatch authorization timestamp"
+        },
+        "commodity": {
+          "type": "string",
+          "enum": ["Rice", "Wheat", "Sugar", "Coarse Grains", "Pulses"],
+          "description": "Allocated commodity"
+        },
+        "variety": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Allocated variety"
+        },
+        "totalBags": {
+          "type": "number",
+          "description": "Total bags issued"
+        },
+        "totalQtl": {
+          "type": "number",
+          "description": "Total weight in quintals"
+        },
+        "destinationFpsId": {
+          "type": "string",
+          "maxLength": 60,
+          "description": "Target Fair Price Shop identifier"
+        },
+        "destinationName": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Destination FPS name"
+        },
+        "destinationDistrict": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Destination district"
+        },
+        "vehicleNumber": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "Carrier vehicle registration number"
+        },
+        "driverName": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Authorized transporter driver name"
+        },
+        "driverPhone": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "Transporter contact mobile number"
+        },
+        "gatePassNo": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Security gate pass serial number"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Dispatched", "In Transit", "Delivered"],
+          "description": "Consignment delivery status"
+        },
+        "dispatchedBy": {
+          "type": "string",
+          "maxLength": 120,
+          "description": "Issuing officer designation"
+        },
+        "authorizedBy": {
+          "type": "string",
+          "maxLength": 120,
+          "description": "Authorizing manager designation"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Record creation timestamp"
+        }
+      },
+      "required": ["challanNumber", "timestamp", "commodity", "totalBags", "destinationFpsId", "status"]
+    },
+    "StockTransaction": {
+      "title": "Stock Ledger Movement",
+      "description": "Granular ledger entry tracking inward intake, dispatch deduction, status change, or reconciliation adjustment.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique transaction event ID"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp of the transaction"
+        },
+        "date": {
+          "type": "string",
+          "description": "Calendar date (YYYY-MM-DD)"
+        },
+        "action": {
+          "type": "string",
+          "enum": ["RECEIPT", "DISPATCH", "STATUS_CHANGE", "ADJUSTMENT"],
+          "description": "Ledger movement action"
+        },
+        "batchId": {
+          "type": "string",
+          "description": "Target batch identifier"
+        },
+        "commodity": {
+          "type": "string",
+          "description": "Commodity"
+        },
+        "quantityBags": {
+          "type": "number",
+          "description": "Quantity in bags"
+        },
+        "quantityQtl": {
+          "type": "number",
+          "description": "Quantity in quintals"
+        },
+        "referenceId": {
+          "type": "string",
+          "description": "Associated challan or document number"
+        },
+        "user": {
+          "type": "string",
+          "description": "Authorizing user"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Creation timestamp"
+        }
+      },
+      "required": ["id", "timestamp", "action", "batchId", "quantityBags", "referenceId"]
+    },
+    "AuditLog": {
+      "title": "Immutable Audit Log",
+      "description": "Append-only cryptographic security audit record for statutory compliance and vigilance oversight.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique audit log identifier"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Log generation timestamp"
+        },
+        "user": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "User who initiated the action"
+        },
+        "role": {
+          "type": "string",
+          "maxLength": 60,
+          "description": "Role held by the user"
+        },
+        "action": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Operation action type"
+        },
+        "entity": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Entity affected"
+        },
+        "referenceId": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Primary reference ID"
+        },
+        "result": {
+          "type": "string",
+          "enum": ["SUCCESS", "WARNING", "REJECTED"],
+          "description": "Outcome of the operation"
+        },
+        "details": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Descriptive audit detail"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Record creation timestamp"
+        }
+      },
+      "required": ["id", "timestamp", "user", "action", "entity", "referenceId", "result"]
+    },
+    "ConnectionTest": {
+      "title": "Database Connection Test",
+      "description": "Diagnostic document used to verify real Cloud Firestore connectivity from the frontend without modifying operational records.",
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["connected", "ok", "ping"],
+          "description": "Ping status indicator"
+        },
+        "lastChecked": {
+          "type": "string",
+          "description": "Timestamp of check"
+        }
+      },
+      "required": ["status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/User"
+      },
+      "description": "Private user account records. Each authenticated user may only read/write their own profile."
+    },
+    "/commodities/{commodityId}": {
+      "schema": {
+        "$ref": "#/entities/Commodity"
+      },
+      "description": "PDS staple commodities master register."
+    },
+    "/batches/{batchId}": {
+      "schema": {
+        "$ref": "#/entities/Batch"
+      },
+      "description": "Grain and staple batches register with FIFO timestamps and current bag balances."
+    },
+    "/dispatches/{challanNumber}": {
+      "schema": {
+        "$ref": "#/entities/DispatchRecord"
+      },
+      "description": "Issued digital challans and transit gate passes."
+    },
+    "/stock_transactions/{transactionId}": {
+      "schema": {
+        "$ref": "#/entities/StockTransaction"
+      },
+      "description": "Immutable ledger tracking stock movements."
+    },
+    "/audit_logs/{logId}": {
+      "schema": {
+        "$ref": "#/entities/AuditLog"
+      },
+      "description": "Append-only immutable audit trail for vigilance compliance."
+    },
+    "/test/{testId}": {
+      "schema": {
+        "$ref": "#/entities/ConnectionTest"
+      },
+      "description": "Diagnostic connectivity ping document."
+    }
+  }
+}

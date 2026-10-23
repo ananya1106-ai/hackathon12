@@ -1,0 +1,8 @@
+{
+  "name": "Remix Remix SmartPDS — Intelligent Commodity Stock Allocation \u0026 FIFO Management",
+  "description": "Intelligent Public Distribution System warehouse stock allocation, strict FIFO batch dispatch engine, digital challan generation, and audit logging for civil supplies depots.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

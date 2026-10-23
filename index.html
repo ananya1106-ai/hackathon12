@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SmartPDS — Intelligent Commodity Stock Allocation & FIFO Management</title>
+    <meta name="description" content="Intelligent Public Distribution System warehouse stock allocation, strict FIFO batch dispatch engine, digital challan generation, and audit logging for civil supplies depots." />
+    <meta property="og:title" content="SmartPDS — Intelligent Commodity Stock Allocation & FIFO Management" />
+    <meta property="og:description" content="Intelligent Public Distribution System warehouse stock allocation, strict FIFO batch dispatch engine, digital challan generation, and audit logging for civil supplies depots." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('smartpds_theme');
+          if (saved === 'light') {
+            document.documentElement.classList.remove('dark');
+          } else {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+  </head>
+  <body class="bg-[#0B0F17] text-[#F1F5F9] font-sans antialiased selection:bg-[#9F1745]/30 selection:text-[#C4B5FD] transition-colors duration-200">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

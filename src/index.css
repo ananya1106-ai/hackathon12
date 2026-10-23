@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --color-main-bg: #FAF7F2;
+    --color-navbar-surface: #FFFFFF;
+    --color-card-bg: #FFFFFF;
+    --color-secondary-surface: #F8FAFC;
+    --color-sidebar: #4A182A;
+    --color-burgundy-deep: #4A182A;
+    --color-burgundy-primary: #A9144B;
+    --color-burgundy: #A9144B;
+    --color-burgundy-dark: #4A182A;
+    --color-lavender: #7C3AED;
+    --color-main-text: #0F172A;
+    --color-secondary-text: #64748B;
+    --color-text-slate: #0F172A;
+    --color-text-secondary: #64748B;
+    --color-border: #E2E8F0;
+    --color-gold: #7C3AED;
+    --color-success: #10B981;
+    --color-warning: #F59E0B;
+  }
+
+  .dark {
+    --color-main-bg: #0B0F17;
+    --color-navbar-surface: #0D1420;
+    --color-card-bg: #141D2A;
+    --color-secondary-surface: #0D1420;
+    --color-sidebar: #4A182A;
+    --color-burgundy-deep: #4A182A;
+    --color-burgundy-primary: #A9144B;
+    --color-burgundy: #A9144B;
+    --color-burgundy-dark: #4A182A;
+    --color-lavender: #C4B5FD;
+    --color-main-text: #F1F5F9;
+    --color-secondary-text: #94A3B8;
+    --color-text-slate: #F1F5F9;
+    --color-text-secondary: #94A3B8;
+    --color-border: #263449;
+    --color-gold: #C4B5FD;
+    --color-success: #10B981;
+    --color-warning: #F59E0B;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #0F172A;
+    background-color: #FAF7F2;
+    letter-spacing: -0.01em;
+    transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark body {
+    color: #F1F5F9;
+    background-color: #0B0F17;
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-heading, .font-display {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  .font-mono, code, kbd, samp, pre {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Custom styling for tabular figures and print-optimized digital challan */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Focus outline theme using Soft Lavender and Burgundy */
+input:focus, select:focus, textarea:focus {
+  border-color: #A9144B !important;
+  box-shadow: 0 0 0 1px #A9144B !important;
+  outline: none !important;
+}
+
+.dark input:focus, .dark select:focus, .dark textarea:focus {
+  border-color: #C4B5FD !important;
+  box-shadow: 0 0 0 1px #C4B5FD !important;
+  outline: none !important;
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0B0F17;
+}
+::-webkit-scrollbar-thumb {
+  background: #263449;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #A9144B;
+}
+
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+  
+  #printable-challan-container {
+    display: block !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 20px !important;
+    background: white !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
